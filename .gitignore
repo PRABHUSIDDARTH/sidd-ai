@@ -1,0 +1,5 @@
+# Local environment variables
+.env
+
+# Maven build artifacts
+target/
