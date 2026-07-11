@@ -40,7 +40,8 @@ public class AiClient {
     }
 
     /**
-     * Call any model and get full response metadata using this client's credentials.
+     * Call any model and get full response metadata using this client's
+     * credentials.
      */
     public ChatResponse chatResponse(String model, String prompt) {
         Chat provider = getProvider(model);
@@ -56,7 +57,8 @@ public class AiClient {
     }
 
     /**
-     * Instantiates the provider based on the routed model, applying client overrides if present.
+     * Instantiates the provider based on the routed model, applying client
+     * overrides if present.
      */
     private Chat getProvider(String model) {
         String lowerModel = model.toLowerCase();

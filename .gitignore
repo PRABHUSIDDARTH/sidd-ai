@@ -1,5 +1,34 @@
 # Local environment variables
 .env
+.env.local
 
 # Maven build artifacts
 target/
+
+# Compiled class files
+*.class
+
+# IDE - IntelliJ
+.idea/
+*.iml
+*.iws
+out/
+
+# IDE - VS Code / Antigravity
+.vscode/
+
+# IDE - Eclipse
+.classpath
+.project
+.settings/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Personal/learning files — not for public repo
+ARCHITECTURE.md
+LEARNING_GUIDE.md
