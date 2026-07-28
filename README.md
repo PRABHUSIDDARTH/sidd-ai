@@ -87,7 +87,7 @@ import io.github.prabhusiddarth.sidd_ai.AiClient;
 
 public class QuickStart {
     public static void main(String[] args) {
-        String response = AiClient.chatQuick("gemini-1.5-flash", "Solve: 23 * 45");
+        String response = AiClient.chatQuick("gemini-2.5-flash", "Solve: 23 * 45");
         System.out.println(response);
     }
 }
@@ -102,7 +102,7 @@ import io.github.prabhusiddarth.sidd_ai.ChatResponse;
 AiClient client = AiClient.builder()
         .openAiApiKey("sk-...")
         .geminiApiKey("AIza...")
-        .defaultModel("gemini-1.5-flash")
+        .defaultModel("gemini-2.5-flash")
         .build();
 
 String answer = client.chat("Explain photosynthesis in one sentence.");
@@ -115,7 +115,7 @@ System.out.println("Tokens used: " + details.getTokensUsed());
 
 ```java
 AiClient.chatQuick("gpt-4o", prompt);           // OpenAI
-AiClient.chatQuick("gemini-1.5-flash", prompt);  // Google Gemini
+AiClient.chatQuick("gemini-2.5-flash", prompt);  // Google Gemini
 AiClient.chatQuick("claude-3-5-sonnet", prompt); // Anthropic
 AiClient.chatQuick("llama3.2", prompt);          // Local Ollama
 ```
@@ -145,7 +145,7 @@ try {
 | Provider | Model prefix | Example |
 |---|---|---|
 | 🟢 OpenAI | `gpt-`, `o1-`, `o3-` | `gpt-4o` |
-| 🔵 Google Gemini | `gemini-` | `gemini-1.5-flash` |
+| 🔵 Google Gemini | `gemini-` | `gemini-2.5-flash` |
 | 🟣 Anthropic Claude | `claude-` | `claude-3-5-sonnet` |
 | ⚪ Ollama (local) | anything else | `llama3.2` |
 
