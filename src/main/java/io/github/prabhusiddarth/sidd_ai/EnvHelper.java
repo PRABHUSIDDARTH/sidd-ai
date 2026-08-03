@@ -43,10 +43,7 @@ public class EnvHelper {
         }
     }
 
-    /**
-     * Retrieve the environment variable value. 
-     * System environment variables take priority, falling back to local .env.
-     */
+  
     public static String get(String key) {
         String value = System.getenv(key);
         if (value == null || value.isBlank()) {

@@ -14,6 +14,9 @@ public class AiClientTest {
                 .geminiApiKey("mockgeminiapikey1234567890")
                 .anthropicApiKey("sk-ant-mockapikey12345")
                 .ollamaHost("http://localhost:11434")
+                .grokApiKey("xai-mockgrokkey1234567890")
+                .nimApiKey("nvapi-mocknimkey1234567890")
+                .kimiApiKey("sk-moon-mockkimikey12345")
                 .build();
 
         assertNotNull(client);
