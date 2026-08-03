@@ -31,9 +31,6 @@ public class AiClient {
         this.kimiApiKey = builder.kimiApiKey;
     }
 
-    /**
-     * Call the default model with a text prompt.
-     */
     public String chat(String prompt) {
         if (defaultModel == null) {
             throw new IllegalStateException("Default model is not configured. Please use chat(model, prompt) instead.");
@@ -42,32 +39,60 @@ public class AiClient {
     }
 
     /**
-     * Call any model with a text prompt using this client's credentials.
+     * Infers provider from model string prefix (kept for backward compat / quick
+     * calls).
      */
     public String chat(String model, String prompt) {
         return chatResponse(model, prompt).getContent();
     }
 
-    /**
-     * Call any model and get full response metadata using this client's
-     * credentials.
-     */
     public ChatResponse chatResponse(String model, String prompt) {
         Chat provider = getProvider(model);
         return provider.callResponse(prompt);
     }
 
     /**
-     * Static utility to call any model with environment variable configuration.
-     * Extremely simple, Python-like one-liner.
+     * Explicit provider selection — use when the caller already knows which
+     * provider was picked (e.g. a menu-driven CLI), instead of guessing from the
+     * model string.
+     * providerKey: "gemini" | "openai" | "anthropic" | "grok" | "nim" | "kimi" |
+     * "ollama"
      */
+    public String chatWithProvider(String providerKey, String model, String prompt) {
+        return chatResponseWithProvider(providerKey, model, prompt).getContent();
+    }
+
+    public ChatResponse chatResponseWithProvider(String providerKey, String model, String prompt) {
+        Chat provider = getProviderByKey(providerKey, model);
+        return provider.callResponse(prompt);
+    }
+
+    public ChatResponse chatResponse(String providerKey, String model, String prompt) {
+        Chat provider = getProviderByKey(providerKey, model);
+        return provider.callResponse(prompt);
+    }
+
     public static String chatQuick(String model, String prompt) {
         return ModelRouter.route(model).call(prompt);
     }
 
+    private Chat getProviderByKey(String providerKey, String model) {
+        return switch (providerKey.toLowerCase()) {
+            case "gemini" -> geminiApiKey != null ? new GeminiChat(model, geminiApiKey) : new GeminiChat(model);
+            case "openai" -> openAiApiKey != null ? new OpenAiChat(model, openAiApiKey) : new OpenAiChat(model);
+            case "anthropic", "claude" ->
+                anthropicApiKey != null ? new AnthropicChat(model, anthropicApiKey) : new AnthropicChat(model);
+            case "grok" -> grokApiKey != null ? new GrokChat(model, grokApiKey) : new GrokChat(model);
+            case "nim", "nvidia" -> nimApiKey != null ? new NimChat(model, nimApiKey) : new NimChat(model);
+            case "kimi", "moonshot" -> kimiApiKey != null ? new KimiChat(model, kimiApiKey) : new KimiChat(model);
+            case "ollama" -> ollamaHost != null ? new OllamaChat(model, ollamaHost) : new OllamaChat(model);
+            default -> throw new IllegalArgumentException("Unknown provider key: " + providerKey);
+        };
+    }
+
     /**
-     * Instantiates the provider based on the routed model, applying client
-     * overrides if present.
+     * Fallback: infers provider from model string prefix. Used by chat(model,
+     * prompt) and chatQuick().
      */
     private Chat getProvider(String model) {
         String lowerModel = model.toLowerCase();
@@ -79,10 +104,22 @@ public class AiClient {
             return anthropicApiKey != null ? new AnthropicChat(model, anthropicApiKey) : new AnthropicChat(model);
         } else if (lowerModel.startsWith("grok-")) {
             return grokApiKey != null ? new GrokChat(model, grokApiKey) : new GrokChat(model);
-        } else if (lowerModel.startsWith("nvidia/") || lowerModel.startsWith("nim-")) {
-            return nimApiKey != null ? new NimChat(model, nimApiKey) : new NimChat(model);
-        } else if (lowerModel.startsWith("moonshot-") || lowerModel.startsWith("kimi-")) {
+        } else if (lowerModel.startsWith("moonshotai/") || lowerModel.startsWith("moonshot-")
+                || lowerModel.startsWith("kimi-")) {
             return kimiApiKey != null ? new KimiChat(model, kimiApiKey) : new KimiChat(model);
+        } else if (lowerModel.startsWith("nvidia/")
+                || lowerModel.startsWith("nim-")
+                || lowerModel.startsWith("deepseek-ai/")
+                || lowerModel.startsWith("z-ai/")
+                || lowerModel.startsWith("zhipuai/")
+                || lowerModel.startsWith("qwen/")
+                || lowerModel.startsWith("minimaxai/")
+                || lowerModel.startsWith("meta/")
+                || lowerModel.startsWith("mistralai/")
+                || lowerModel.startsWith("microsoft/")
+                || lowerModel.startsWith("ibm/")
+                || lowerModel.startsWith("openai/")) {
+            return nimApiKey != null ? new NimChat(model, nimApiKey) : new NimChat(model);
         } else {
             return ollamaHost != null ? new OllamaChat(model, ollamaHost) : new OllamaChat(model);
         }
