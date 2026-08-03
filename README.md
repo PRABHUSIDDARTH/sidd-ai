@@ -1,8 +1,10 @@
 <div align="center">
 
+<img src="assets/logo.png" width="180" alt="sidd-ai logo"/>
+
 <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:1e3a8a,100:9333ea&height=200&section=header&text=sidd-ai&fontSize=70&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=One%20Java%20SDK.%20Every%20AI%20model.&descAlignY=55&descSize=18"/>
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&pause=1000&color=9333EA&center=true&vCenter=true&width=600&lines=AiClient.chatQuick(%22gpt-4o%22%2C+prompt);import+io.github.prabhusiddarth.sidd_ai.*;No+Spring.+No+DI.+No+ceremony.;Just+import+and+call." alt="Typing SVG" />
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&pause=1000&color=9333EA&center=true&vCenter=true&width=700&lines=AiClient.chatQuick(%22gpt-4o%22%2C+prompt);AiClient.chatQuick(%22grok-3%22%2C+prompt);AiClient.chatQuick(%22gemini-2.5-flash%22%2C+prompt);AiClient.chatQuick(%22moonshot-v1-8k%22%2C+prompt);import+io.github.prabhusiddarth.sidd_ai.*;No+Spring.+No+DI.+No+ceremony.;Just+import+and+call." alt="Typing SVG" />
 
 <br/>
 
