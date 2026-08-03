@@ -54,14 +54,14 @@ That's it. That's the whole setup.
 <dependency>
     <groupId>io.github.prabhusiddarth</groupId>
     <artifactId>sidd-ai</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.4</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-implementation 'io.github.prabhusiddarth:sidd-ai:1.0.0'
+implementation 'io.github.prabhusiddarth:sidd-ai:1.0.4'
 ```
 
 ### No build tool? No problem.
@@ -69,7 +69,7 @@ implementation 'io.github.prabhusiddarth:sidd-ai:1.0.0'
 Download the pre-built fat jar (all dependencies bundled) straight from [GitHub Releases](https://github.com/PRABHUSIDDARTH/sidd-ai/releases) — drag it into your project's classpath, no Maven or Gradle needed.
 
 ```bash
-curl -L -o sidd-ai.jar https://github.com/PRABHUSIDDARTH/sidd-ai/releases/latest/download/sidd-ai-1.0.0-all.jar
+curl -L -o sidd-ai.jar https://github.com/PRABHUSIDDARTH/sidd-ai/releases/latest/download/sidd-ai-1.0.4-all.jar
 javac -cp sidd-ai.jar Main.java
 java -cp .:sidd-ai.jar Main
 ```
@@ -102,25 +102,38 @@ import io.github.prabhusiddarth.sidd_ai.ChatResponse;
 AiClient client = AiClient.builder()
         .openAiApiKey("sk-...")
         .geminiApiKey("AIza...")
+        .grokApiKey("xai-...")
+        .nimApiKey("nvapi-...")
+        .kimiApiKey("sk-kimi-...")
         .defaultModel("gemini-2.5-flash")
         .build();
 
 String answer = client.chat("Explain photosynthesis in one sentence.");
 
-ChatResponse details = client.chatResponse("gpt-4o", "Hello!");
+ChatResponse details = client.chatResponse("grok-3", "Hello Grok!");
 System.out.println("Tokens used: " + details.getTokensUsed());
 ```
 
 ### 3. Swap providers by changing one string
 
 ```java
-AiClient.chatQuick("gpt-4o", prompt);           // OpenAI
-AiClient.chatQuick("gemini-2.5-flash", prompt);  // Google Gemini
-AiClient.chatQuick("claude-3-5-sonnet", prompt); // Anthropic
-AiClient.chatQuick("llama3.2", prompt);          // Local Ollama
+AiClient.chatQuick("gpt-4o", prompt);                       // OpenAI
+AiClient.chatQuick("gemini-2.5-flash", prompt);              // Google Gemini
+AiClient.chatQuick("claude-3-5-sonnet", prompt);             // Anthropic
+AiClient.chatQuick("grok-3", prompt);                        // xAI Grok
+AiClient.chatQuick("deepseek-ai/deepseek-r1", prompt);       // NVIDIA NIM
+AiClient.chatQuick("moonshot-v1-8k", prompt);                // Moonshot Kimi
+AiClient.chatQuick("llama3.2", prompt);                      // Local Ollama
 ```
 
-### 4. Resilient error handling
+### 4. Explicit provider selection (bypass prefix routing)
+
+```java
+// Useful when the model name has no recognizable prefix
+String response = client.chatWithProvider("nim", "meta/llama-3.1-8b-instruct", prompt);
+```
+
+### 5. Resilient error handling
 
 ```java
 import io.github.prabhusiddarth.sidd_ai.exceptions.*;
@@ -142,16 +155,19 @@ try {
 
 <div align="center">
 
-| Provider | Model prefix | Example |
+| Provider | Model prefix(es) | Example |
 |---|---|---|
 | 🟢 OpenAI | `gpt-`, `o1-`, `o3-` | `gpt-4o` |
 | 🔵 Google Gemini | `gemini-` | `gemini-2.5-flash` |
 | 🟣 Anthropic Claude | `claude-` | `claude-3-5-sonnet` |
+| ⚡ xAI Grok | `grok-` | `grok-3` |
+| 🔶 NVIDIA NIM | `nvidia/`, `nim-`, `deepseek-ai/`, `meta/`, `mistralai/`, `microsoft/`, `ibm/`, `qwen/`, and more | `nvidia/llama-3.1-nemotron-ultra-253b-v1` |
+| 🌙 Moonshot Kimi | `moonshot-`, `kimi-`, `moonshotai/` | `moonshot-v1-8k` |
 | ⚪ Ollama (local) | anything else | `llama3.2` |
 
 </div>
 
-Routing is automatic — `ModelRouter` reads the model string prefix and instantiates the right provider under the hood. No manual imports of provider-specific classes needed.
+Routing is **automatic** — `ModelRouter` reads the model string prefix and instantiates the right provider under the hood. No manual imports of provider-specific classes needed. You can also bypass prefix routing entirely using `client.chatWithProvider("nim", model, prompt)` to explicitly select a provider.
 
 ---
 
@@ -169,7 +185,7 @@ cd sidd-ai
 mvn clean install
 ```
 
-Runs the full test suite (16 tests across all providers and the router) and installs to your local `.m2` repository.
+Runs the full test suite (across all providers and the router) and installs to your local `.m2` repository.
 
 ---
 

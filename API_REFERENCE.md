@@ -16,6 +16,9 @@ The central facade of the library. It orchestrates routing, applies client crede
 * `private final String geminiApiKey`: Custom API key override for Google Gemini.
 * `private final String anthropicApiKey`: Custom API key override for Anthropic Claude.
 * `private final String ollamaHost`: Custom host URL override for Ollama.
+* `private final String grokApiKey`: Custom API key override for xAI Grok.
+* `private final String nimApiKey`: Custom API key override for NVIDIA NIM.
+* `private final String kimiApiKey`: Custom API key override for Moonshot AI Kimi.
 
 #### Constructors
 * `private AiClient(Builder builder)`
@@ -26,9 +29,9 @@ The central facade of the library. It orchestrates routing, applies client crede
   * **Description**: Instantiates a new builder instance to configure and create an `AiClient`.
   * **Returns**: `AiClient.Builder`
 * `public static String chatQuick(String model, String prompt)`
-  * **Description**: Quick, zero-setup static utility method to call any model. Automatically resolves API keys/hosts from environment variables or local `.env` file via `EnvHelper`.
+  * **Description**: Quick, zero-setup static utility method to call any model. Automatically resolves API keys/hosts from environment variables or local `.env` file via `EnvHelper`. Delegates routing to `ModelRouter`.
   * **Parameters**:
-    * `model`: The model identifier (e.g., `"gpt-4o"`, `"gemini-1.5-flash"`).
+    * `model`: The model identifier (e.g., `"gpt-4o"`, `"gemini-2.5-flash"`, `"grok-3"`, `"nvidia/llama-3.1-nemotron-ultra-253b-v1"`).
     * `prompt`: The text instruction to send.
   * **Returns**: `String` containing the response text content.
   * **Throws**: `AiException` (or subclass) on authentication, rate limit, or communication failure.
@@ -43,17 +46,31 @@ The central facade of the library. It orchestrates routing, applies client crede
     * `IllegalStateException`: If `defaultModel` was not configured on the client builder.
     * `AiException`: On API failures.
 * `public String chat(String model, String prompt)`
-  * **Description**: Sends a prompt to a specific model using the client's configured credentials.
+  * **Description**: Sends a prompt to a specific model using the client's configured credentials. Provider is inferred from the model string prefix.
   * **Parameters**:
     * `model`: The model identifier.
     * `prompt`: The text instruction.
   * **Returns**: `String` containing the response text content.
 * `public ChatResponse chatResponse(String model, String prompt)`
-  * **Description**: Sends a prompt and returns the full response metadata (including token usage).
+  * **Description**: Sends a prompt and returns the full response metadata (including token usage). Provider is inferred from the model string prefix.
   * **Parameters**:
     * `model`: The model identifier.
     * `prompt`: The text instruction.
   * **Returns**: `ChatResponse` containing text content, model name, and token usage statistics.
+* `public String chatWithProvider(String providerKey, String model, String prompt)`
+  * **Description**: Sends a prompt using an **explicitly named** provider key, bypassing prefix-based inference. Useful for menu-driven UIs or when the caller already knows which provider to use.
+  * **Parameters**:
+    * `providerKey`: One of `"openai"`, `"gemini"`, `"anthropic"` / `"claude"`, `"grok"`, `"nim"` / `"nvidia"`, `"kimi"` / `"moonshot"`, `"ollama"`.
+    * `model`: The model identifier to pass to the provider.
+    * `prompt`: The text instruction.
+  * **Returns**: `String` content.
+  * **Throws**: `IllegalArgumentException` if `providerKey` is unknown.
+* `public ChatResponse chatResponseWithProvider(String providerKey, String model, String prompt)`
+  * **Description**: Same as `chatWithProvider` but returns the full `ChatResponse`.
+  * **Returns**: `ChatResponse`.
+* `public ChatResponse chatResponse(String providerKey, String model, String prompt)`
+  * **Description**: Overloaded convenience method. Identical behavior to `chatResponseWithProvider`.
+  * **Returns**: `ChatResponse`.
 
 ---
 
@@ -77,6 +94,15 @@ Builder pattern implementation to configure and instantiate `AiClient` instances
 * `public Builder ollamaHost(String ollamaHost)`
   * **Description**: Manually sets the host URL for Ollama local service (defaults to `http://localhost:11434`).
   * **Returns**: `Builder`
+* `public Builder grokApiKey(String grokApiKey)`
+  * **Description**: Manually sets the xAI Grok API key (bypassing `GROK_API_KEY` env var).
+  * **Returns**: `Builder`
+* `public Builder nimApiKey(String nimApiKey)`
+  * **Description**: Manually sets the NVIDIA NIM API key (bypassing `NIM_API_KEY` env var).
+  * **Returns**: `Builder`
+* `public Builder kimiApiKey(String kimiApiKey)`
+  * **Description**: Manually sets the Moonshot AI Kimi API key (bypassing `KIMI_API_KEY` env var).
+  * **Returns**: `Builder`
 * `public AiClient build()`
   * **Description**: Builds and returns an immutable `AiClient` instance configured with the specified parameters.
   * **Returns**: `AiClient`
@@ -87,7 +113,7 @@ Builder pattern implementation to configure and instantiate `AiClient` instances
 
 ### `io.github.prabhusiddarth.sidd_ai.Chat` (Interface)
 
-Contract implemented by all model providers (`OpenAiChat`, `GeminiChat`, etc.). Defines standard synchronous API interaction strategies.
+Contract implemented by all model providers (`OpenAiChat`, `GeminiChat`, `GrokChat`, etc.). Defines standard synchronous API interaction strategies.
 
 #### Methods
 * `ChatResponse callResponse(String prompt)`
@@ -178,7 +204,10 @@ Providers implement the `Chat` interface. Each encapsulates communication logic 
 
 ### `io.github.prabhusiddarth.sidd_ai.providers.OpenAiChat`
 
-Communicates with the OpenAI completions endpoints.
+Communicates with the OpenAI chat completions endpoint.
+
+* **Endpoint**: `https://api.openai.com/v1/chat/completions`
+* **Env var**: `OPENAI_API_KEY`
 
 #### Constructors
 * `public OpenAiChat(String model)`
@@ -198,6 +227,9 @@ Communicates with the OpenAI completions endpoints.
 
 Communicates with Google Gemini APIs.
 
+* **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent`
+* **Env var**: `GEMINI_API_KEY`
+
 #### Constructors
 * `public GeminiChat(String model)`
   * **Description**: Instantiates a provider reading `GEMINI_API_KEY` automatically via `EnvHelper`.
@@ -216,6 +248,9 @@ Communicates with Google Gemini APIs.
 
 Communicates with Anthropic Claude APIs.
 
+* **Endpoint**: `https://api.anthropic.com/v1/messages`
+* **Env var**: `ANTHROPIC_API_KEY`
+
 #### Constructors
 * `public AnthropicChat(String model)`
   * **Description**: Instantiates a provider reading `ANTHROPIC_API_KEY` automatically via `EnvHelper`.
@@ -230,9 +265,75 @@ Communicates with Anthropic Claude APIs.
 
 ---
 
+### `io.github.prabhusiddarth.sidd_ai.providers.GrokChat`
+
+Communicates with xAI's Grok API using an OpenAI-compatible chat completions format.
+
+* **Endpoint**: `https://api.x.ai/v1/chat/completions`
+* **Env var**: `GROK_API_KEY`
+
+#### Constructors
+* `public GrokChat(String model)`
+  * **Description**: Instantiates a provider reading `GROK_API_KEY` automatically via `EnvHelper`.
+* `public GrokChat(String model, String apiKey)`
+  * **Description**: Instantiates a provider using a manually supplied API key.
+  * **Throws**:
+    * `AiAuthException`: If the key is null or blank.
+
+#### Public Methods
+* `@Override public ChatResponse callResponse(String prompt)`
+  * **Description**: Sends a request to `https://api.x.ai/v1/chat/completions` with a `Bearer` token auth header. Parses the OpenAI-compatible response format.
+
+---
+
+### `io.github.prabhusiddarth.sidd_ai.providers.NimChat`
+
+Communicates with NVIDIA NIM (NVIDIA Inference Microservices). Supports a large catalogue of hosted models from NVIDIA, Meta, Mistral, DeepSeek, Microsoft, IBM, Qwen, and more — all through a single OpenAI-compatible endpoint.
+
+* **Endpoint**: `https://integrate.api.nvidia.com/v1/chat/completions`
+* **Env var**: `NIM_API_KEY`
+
+#### Constructors
+* `public NimChat(String model)`
+  * **Description**: Instantiates a provider reading `NIM_API_KEY` automatically via `EnvHelper`.
+* `public NimChat(String model, String apiKey)`
+  * **Description**: Instantiates a provider using a manually supplied API key.
+  * **Throws**:
+    * `AiAuthException`: If the key is null or blank.
+
+#### Public Methods
+* `@Override public ChatResponse callResponse(String prompt)`
+  * **Description**: Sends a request to `https://integrate.api.nvidia.com/v1/chat/completions` with a `Bearer` token. Parses the OpenAI-compatible response format.
+
+---
+
+### `io.github.prabhusiddarth.sidd_ai.providers.KimiChat`
+
+Communicates with Moonshot AI's Kimi API using an OpenAI-compatible chat completions format.
+
+* **Endpoint**: `https://api.moonshot.cn/v1/chat/completions`
+* **Env var**: `KIMI_API_KEY`
+
+#### Constructors
+* `public KimiChat(String model)`
+  * **Description**: Instantiates a provider reading `KIMI_API_KEY` automatically via `EnvHelper`.
+* `public KimiChat(String model, String apiKey)`
+  * **Description**: Instantiates a provider using a manually supplied API key.
+  * **Throws**:
+    * `AiAuthException`: If the key is null or blank.
+
+#### Public Methods
+* `@Override public ChatResponse callResponse(String prompt)`
+  * **Description**: Sends a request to `https://api.moonshot.cn/v1/chat/completions` with a `Bearer` token. Parses the OpenAI-compatible response format.
+
+---
+
 ### `io.github.prabhusiddarth.sidd_ai.providers.OllamaChat`
 
 Communicates with a locally deployed Ollama server instance.
+
+* **Endpoint**: `{host}/api/chat` (default host: `http://localhost:11434`)
+* **Env var**: `OLLAMA_HOST` (optional, falls back to localhost)
 
 #### Constructors
 * `public OllamaChat(String model)`
@@ -250,15 +351,24 @@ Communicates with a locally deployed Ollama server instance.
 
 ### `io.github.prabhusiddarth.sidd_ai.router.ModelRouter`
 
-A static router class that analyzes model name prefixes to identify and instantiate the appropriate provider object.
+A static router class that analyzes model name prefixes to identify and instantiate the appropriate provider object. Used internally by `AiClient.chatQuick()` and `AiClient.chat(model, prompt)`.
 
 #### Public Static Methods
 * `public static Chat route(String model)`
-  * **Description**: Analyzes model name input to dynamically determine class routing:
-    * Starts with `gpt-`, `o1-`, or `o3-` &rarr; `OpenAiChat`
-    * Starts with `gemini-` &rarr; `GeminiChat`
-    * Starts with `claude-` &rarr; `AnthropicChat`
-    * Anything else &rarr; `OllamaChat` (local fallback)
+  * **Description**: Analyzes the model name to dynamically determine and instantiate the correct provider. The routing rules applied are:
+
+    | Model prefix(es) | Provider |
+    |---|---|
+    | `gpt-`, `o1-`, `o3-` | `OpenAiChat` |
+    | `gemini-` | `GeminiChat` |
+    | `claude-` | `AnthropicChat` |
+    | `grok-` | `GrokChat` |
+    | `nvidia/`, `nim-` | `NimChat` |
+    | `moonshot-`, `kimi-` | `KimiChat` |
+    | anything else | `OllamaChat` (local fallback) |
+
+  > **Note**: The full prefix-inference logic in `AiClient.getProvider()` covers additional NIM-hosted namespaces (`deepseek-ai/`, `z-ai/`, `zhipuai/`, `qwen/`, `minimaxai/`, `meta/`, `mistralai/`, `microsoft/`, `ibm/`, `openai/`) and Kimi's `moonshotai/` prefix. Use `chatWithProvider()` to bypass prefix routing entirely.
+
   * **Parameters**:
     * `model`: Model name string.
   * **Returns**: `Chat` provider instance.
@@ -270,6 +380,18 @@ A static router class that analyzes model name prefixes to identify and instanti
 ### `io.github.prabhusiddarth.sidd_ai.EnvHelper`
 
 Reads configuration environments, giving priority to system environment variables, then falling back to keys defined in a local root `.env` file.
+
+#### Supported environment variables
+
+| Variable | Provider |
+|---|---|
+| `OPENAI_API_KEY` | OpenAI |
+| `GEMINI_API_KEY` | Google Gemini |
+| `ANTHROPIC_API_KEY` | Anthropic Claude |
+| `GROK_API_KEY` | xAI Grok |
+| `NIM_API_KEY` | NVIDIA NIM |
+| `KIMI_API_KEY` | Moonshot AI Kimi |
+| `OLLAMA_HOST` | Ollama (optional) |
 
 #### Public Static Methods
 * `public static String get(String key)`
@@ -328,9 +450,15 @@ import io.github.prabhusiddarth.sidd_ai.AiClient;
 
 public class QuickStart {
     public static void main(String[] args) {
-        // Automatically selects OpenAiChat and gets API key from OPENAI_API_KEY env var
-        String response = AiClient.chatQuick("gpt-4o", "Solve: 23 * 45");
-        System.out.println("Answer: " + response);
+        // OpenAI
+        String r1 = AiClient.chatQuick("gpt-4o", "Solve: 23 * 45");
+        // Grok
+        String r2 = AiClient.chatQuick("grok-3", "Explain black holes");
+        // NVIDIA NIM (hosted DeepSeek)
+        String r3 = AiClient.chatQuick("deepseek-ai/deepseek-r1", "What is recursion?");
+        // Moonshot Kimi
+        String r4 = AiClient.chatQuick("moonshot-v1-8k", "Summarize this text");
+        System.out.println(r1);
     }
 }
 ```
@@ -345,24 +473,50 @@ import io.github.prabhusiddarth.sidd_ai.ChatResponse;
 public class CustomClient {
     public static void main(String[] args) {
         AiClient client = AiClient.builder()
-                .openAiApiKey("custom-sk-key-...")
-                .geminiApiKey("custom-gemini-key-...")
-                .defaultModel("gemini-1.5-flash")
+                .openAiApiKey("sk-...")
+                .geminiApiKey("AIza...")
+                .grokApiKey("xai-...")
+                .nimApiKey("nvapi-...")
+                .kimiApiKey("sk-kimi-...")
+                .defaultModel("gemini-2.5-flash")
                 .build();
 
-        // 1. Call default model
+        // Call default model
         String defaultAnswer = client.chat("Explain photosynthesis in one sentence.");
         System.out.println(defaultAnswer);
 
-        // 2. Call specific model with token response details
-        ChatResponse details = client.chatResponse("gpt-4o", "Hello OpenAI!");
+        // Call a specific model with response metadata
+        ChatResponse details = client.chatResponse("grok-3", "Hello Grok!");
         System.out.println("Tokens Used: " + details.getTokensUsed());
         System.out.println("Result: " + details.getContent());
     }
 }
 ```
 
-### Example 3: Rich Exception Handling
+### Example 3: Explicit Provider Selection
+Use `chatWithProvider()` when you want to bypass prefix inference — e.g., in a UI where the user selects the provider from a dropdown.
+
+```java
+import io.github.prabhusiddarth.sidd_ai.AiClient;
+
+public class ExplicitProvider {
+    public static void main(String[] args) {
+        AiClient client = AiClient.builder()
+                .nimApiKey("nvapi-...")
+                .build();
+
+        // Route directly to NIM even though "llama-3.1-8b-instruct" has no vendor prefix
+        String response = client.chatWithProvider(
+                "nim",
+                "meta/llama-3.1-8b-instruct",
+                "Write a haiku about Java"
+        );
+        System.out.println(response);
+    }
+}
+```
+
+### Example 4: Rich Exception Handling
 Catch exceptions selectively to build highly resilient integrations.
 
 ```java
