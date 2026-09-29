@@ -44,6 +44,7 @@ public class GrokChat implements Chat {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(ENDPOINT))
+                .timeout(Duration.ofSeconds(60))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + apiKey)
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
@@ -52,8 +53,10 @@ public class GrokChat implements Chat {
         try {
             HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             return handleResponse(response);
-        } catch (java.io.IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new AiApiException("Failed to call Grok: " + e.getMessage(), e);
+        } catch (java.io.IOException e) {
             throw new AiApiException("Failed to call Grok: " + e.getMessage(), e);
         }
     }
@@ -75,7 +78,8 @@ public class GrokChat implements Chat {
     private ChatResponse handleResponse(HttpResponse<String> response) {
         int status = response.statusCode();
 
-        if (status == 401) {
+        if (status == 401
+                || (status == 400 && response.body().contains("Incorrect API key"))) {
             throw new AiAuthException("Invalid Grok API key");
         }
         if (status == 429) {

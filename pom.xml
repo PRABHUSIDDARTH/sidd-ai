@@ -5,11 +5,11 @@
 
     <groupId>io.github.prabhusiddarth</groupId>
     <artifactId>sidd-ai</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <packaging>jar</packaging>
 
     <name>sidd-ai</name>
-    <description>A flexible and easy-to-use Java package to interact with multiple AI providers (OpenAI, Gemini, Anthropic, Ollama).</description>
+    <description>A flexible Java SDK for OpenAI, Gemini, Anthropic, xAI, Groq, NVIDIA NIM, Kimi, and Ollama.</description>
     <url>https://github.com/PRABHUSIDDARTH/sidd-ai</url>
 
     <licenses>
@@ -36,7 +36,7 @@
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version>2.15.2</jackson.version>
+        <jackson.version>2.22.3</jackson.version>
         <junit.version>5.10.0</junit.version>
     </properties>
 

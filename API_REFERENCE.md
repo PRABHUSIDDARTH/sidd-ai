@@ -17,6 +17,7 @@ The central facade of the library. It orchestrates routing, applies client crede
 * `private final String anthropicApiKey`: Custom API key override for Anthropic Claude.
 * `private final String ollamaHost`: Custom host URL override for Ollama.
 * `private final String grokApiKey`: Custom API key override for xAI Grok.
+* `private final String groqApiKey`: Custom API key override for Groq.
 * `private final String nimApiKey`: Custom API key override for NVIDIA NIM.
 * `private final String kimiApiKey`: Custom API key override for Moonshot AI Kimi.
 
@@ -31,7 +32,7 @@ The central facade of the library. It orchestrates routing, applies client crede
 * `public static String chatQuick(String model, String prompt)`
   * **Description**: Quick, zero-setup static utility method to call any model. Automatically resolves API keys/hosts from environment variables or local `.env` file via `EnvHelper`. Delegates routing to `ModelRouter`.
   * **Parameters**:
-    * `model`: The model identifier (e.g., `"gpt-4o"`, `"gemini-2.5-flash"`, `"grok-3"`, `"nvidia/llama-3.1-nemotron-ultra-253b-v1"`).
+    * `model`: The model identifier (e.g., `"gpt-4o"`, `"gemini-2.5-flash"`, `"grok-4.3"`, `"openai/gpt-oss-20b"`).
     * `prompt`: The text instruction to send.
   * **Returns**: `String` containing the response text content.
   * **Throws**: `AiException` (or subclass) on authentication, rate limit, or communication failure.
@@ -96,6 +97,9 @@ Builder pattern implementation to configure and instantiate `AiClient` instances
   * **Returns**: `Builder`
 * `public Builder grokApiKey(String grokApiKey)`
   * **Description**: Manually sets the xAI Grok API key (bypassing `GROK_API_KEY` env var).
+  * **Returns**: `Builder`
+* `public Builder groqApiKey(String groqApiKey)`
+  * **Description**: Manually sets the Groq API key (bypassing `GROQ_API_KEY` env var).
   * **Returns**: `Builder`
 * `public Builder nimApiKey(String nimApiKey)`
   * **Description**: Manually sets the NVIDIA NIM API key (bypassing `NIM_API_KEY` env var).
@@ -240,7 +244,7 @@ Communicates with Google Gemini APIs.
 
 #### Public Methods
 * `@Override public ChatResponse callResponse(String prompt)`
-  * **Description**: Sends a request to Google's generate content REST endpoint. Appends the API key as a query parameter.
+  * **Description**: Sends a request to Google's generate content REST endpoint. Supplies the API key in the `x-goog-api-key` header.
 
 ---
 
@@ -283,6 +287,27 @@ Communicates with xAI's Grok API using an OpenAI-compatible chat completions for
 #### Public Methods
 * `@Override public ChatResponse callResponse(String prompt)`
   * **Description**: Sends a request to `https://api.x.ai/v1/chat/completions` with a `Bearer` token auth header. Parses the OpenAI-compatible response format.
+
+---
+
+### `io.github.prabhusiddarth.sidd_ai.providers.GroqChat`
+
+Communicates with Groq using its OpenAI-compatible chat completions API.
+
+* **Endpoint**: `https://api.groq.com/openai/v1/chat/completions`
+* **Env var**: `GROQ_API_KEY`
+
+#### Constructors
+* `public GroqChat(String model)`
+  * **Description**: Instantiates a provider reading `GROQ_API_KEY` automatically via `EnvHelper`.
+* `public GroqChat(String model, String apiKey)`
+  * **Description**: Instantiates a provider using a manually supplied API key.
+  * **Throws**:
+    * `AiAuthException`: If the key is null or blank.
+
+#### Public Methods
+* `@Override public ChatResponse callResponse(String prompt)`
+  * **Description**: Sends a request to Groq with a `Bearer` token auth header and parses its OpenAI-compatible response.
 
 ---
 
@@ -453,11 +478,11 @@ public class QuickStart {
         // OpenAI
         String r1 = AiClient.chatQuick("gpt-4o", "Solve: 23 * 45");
         // Grok
-        String r2 = AiClient.chatQuick("grok-3", "Explain black holes");
-        // NVIDIA NIM (hosted DeepSeek)
-        String r3 = AiClient.chatQuick("deepseek-ai/deepseek-r1", "What is recursion?");
+        String r2 = AiClient.chatQuick("grok-4.3", "Explain black holes");
+        // NVIDIA NIM (hosted GPT-OSS)
+        String r3 = AiClient.chatQuick("openai/gpt-oss-20b", "What is recursion?");
         // Moonshot Kimi
-        String r4 = AiClient.chatQuick("moonshot-v1-8k", "Summarize this text");
+        String r4 = AiClient.chatQuick("kimi-k2.5", "Summarize this text");
         System.out.println(r1);
     }
 }
@@ -476,6 +501,7 @@ public class CustomClient {
                 .openAiApiKey("sk-...")
                 .geminiApiKey("AIza...")
                 .grokApiKey("xai-...")
+                .groqApiKey("gsk_...")
                 .nimApiKey("nvapi-...")
                 .kimiApiKey("sk-kimi-...")
                 .defaultModel("gemini-2.5-flash")
@@ -486,7 +512,7 @@ public class CustomClient {
         System.out.println(defaultAnswer);
 
         // Call a specific model with response metadata
-        ChatResponse details = client.chatResponse("grok-3", "Hello Grok!");
+        ChatResponse details = client.chatResponse("grok-4.3", "Hello Grok!");
         System.out.println("Tokens Used: " + details.getTokensUsed());
         System.out.println("Result: " + details.getContent());
     }
@@ -528,7 +554,7 @@ import io.github.prabhusiddarth.sidd_ai.exceptions.AiApiException;
 public class ResilientChat {
     public static void main(String[] args) {
         try {
-            String answer = AiClient.chatQuick("claude-3-5-sonnet", "Write a haiku about code");
+            String answer = AiClient.chatQuick("claude-haiku-4-5-20251001", "Write a haiku about code");
             System.out.println(answer);
         } catch (AiAuthException e) {
             System.err.println("Authentication error! Please verify your ANTHROPIC_API_KEY.");

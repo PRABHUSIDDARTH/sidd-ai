@@ -4,6 +4,7 @@ import io.github.prabhusiddarth.sidd_ai.Chat;
 import io.github.prabhusiddarth.sidd_ai.providers.AnthropicChat;
 import io.github.prabhusiddarth.sidd_ai.providers.GeminiChat;
 import io.github.prabhusiddarth.sidd_ai.providers.GrokChat;
+import io.github.prabhusiddarth.sidd_ai.providers.GroqChat;
 import io.github.prabhusiddarth.sidd_ai.providers.KimiChat;
 import io.github.prabhusiddarth.sidd_ai.providers.NimChat;
 import io.github.prabhusiddarth.sidd_ai.providers.OllamaChat;
@@ -55,12 +56,42 @@ public class ModelRouterTest {
     }
 
     @Test
+    public void testRouteGroq() {
+        try {
+            Chat chat = ModelRouter.route("llama-3.3-70b-versatile");
+            assertTrue(chat instanceof GroqChat);
+        } catch (Exception e) {
+            assertTrue(e.getMessage().contains("GROQ_API_KEY"));
+        }
+    }
+
+    @Test
     public void testRouteNim() {
         try {
             Chat chat = ModelRouter.route("nvidia/llama-3.1-nemotron-70b-instruct");
             assertTrue(chat instanceof NimChat);
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("NIM_API_KEY"));
+        }
+    }
+
+    @Test
+    public void testRouteDocumentedNimPrefixes() {
+        String[] models = {
+                "deepseek-ai/deepseek-v4-flash",
+                "meta/llama-3.3-70b-instruct",
+                "mistralai/mistral-nemotron",
+                "microsoft/phi-4-mini-instruct",
+                "qwen/qwen3-next-80b-a3b-instruct",
+                "openai/gpt-oss-20b"
+        };
+
+        for (String model : models) {
+            try {
+                assertTrue(ModelRouter.route(model) instanceof NimChat);
+            } catch (Exception e) {
+                assertTrue(e.getMessage().contains("NIM_API_KEY"));
+            }
         }
     }
 

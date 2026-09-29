@@ -18,7 +18,7 @@ import java.time.Duration;
 public class GeminiChat implements Chat {
 
     private static final String ENDPOINT_TEMPLATE =
-            "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s";
+            "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent";
     private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
@@ -41,20 +41,24 @@ public class GeminiChat implements Chat {
 
     @Override
     public ChatResponse callResponse(String prompt) {
-        String url = String.format(ENDPOINT_TEMPLATE, model, apiKey);
+        String url = String.format(ENDPOINT_TEMPLATE, model);
         String requestBody = buildRequestBody(prompt);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
+                .timeout(Duration.ofSeconds(60))
                 .header("Content-Type", "application/json")
+                .header("x-goog-api-key", apiKey)
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
 
         try {
             HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             return handleResponse(response);
-        } catch (java.io.IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new AiApiException("Failed to call Gemini: " + e.getMessage(), e);
+        } catch (java.io.IOException e) {
             throw new AiApiException("Failed to call Gemini: " + e.getMessage(), e);
         }
     }
@@ -75,7 +79,8 @@ public class GeminiChat implements Chat {
     private ChatResponse handleResponse(HttpResponse<String> response) {
         int status = response.statusCode();
 
-        if (status == 401 || status == 403) {
+        if (status == 401 || status == 403
+                || (status == 400 && response.body().contains("API_KEY_INVALID"))) {
             throw new AiAuthException("Invalid Gemini API key");
         }
         if (status == 429) {

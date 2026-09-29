@@ -3,13 +3,16 @@ package io.github.prabhusiddarth.sidd_ai;
 import io.github.prabhusiddarth.sidd_ai.providers.AnthropicChat;
 import io.github.prabhusiddarth.sidd_ai.providers.GeminiChat;
 import io.github.prabhusiddarth.sidd_ai.providers.GrokChat;
+import io.github.prabhusiddarth.sidd_ai.providers.GroqChat;
 import io.github.prabhusiddarth.sidd_ai.providers.KimiChat;
 import io.github.prabhusiddarth.sidd_ai.providers.NimChat;
 import io.github.prabhusiddarth.sidd_ai.providers.OllamaChat;
 import io.github.prabhusiddarth.sidd_ai.providers.OpenAiChat;
 import io.github.prabhusiddarth.sidd_ai.router.ModelRouter;
 
-public class AiClient {
+import java.util.Locale;
+
+public final class AiClient {
 
     private final String defaultModel;
     private final String openAiApiKey;
@@ -17,6 +20,7 @@ public class AiClient {
     private final String anthropicApiKey;
     private final String ollamaHost;
     private final String grokApiKey;
+    private final String groqApiKey;
     private final String nimApiKey;
     private final String kimiApiKey;
 
@@ -27,6 +31,7 @@ public class AiClient {
         this.anthropicApiKey = builder.anthropicApiKey;
         this.ollamaHost = builder.ollamaHost;
         this.grokApiKey = builder.grokApiKey;
+        this.groqApiKey = builder.groqApiKey;
         this.nimApiKey = builder.nimApiKey;
         this.kimiApiKey = builder.kimiApiKey;
     }
@@ -55,7 +60,7 @@ public class AiClient {
      * Explicit provider selection — use when the caller already knows which
      * provider was picked (e.g. a menu-driven CLI), instead of guessing from the
      * model string.
-     * providerKey: "gemini" | "openai" | "anthropic" | "grok" | "nim" | "kimi" |
+     * providerKey: "gemini" | "openai" | "anthropic" | "grok" | "groq" | "nim" | "kimi" |
      * "ollama"
      */
     public String chatWithProvider(String providerKey, String model, String prompt) {
@@ -77,12 +82,16 @@ public class AiClient {
     }
 
     private Chat getProviderByKey(String providerKey, String model) {
-        return switch (providerKey.toLowerCase()) {
+        if (providerKey == null || providerKey.isBlank()) {
+            throw new IllegalArgumentException("Provider key cannot be empty");
+        }
+        return switch (providerKey.toLowerCase(Locale.ROOT)) {
             case "gemini" -> geminiApiKey != null ? new GeminiChat(model, geminiApiKey) : new GeminiChat(model);
             case "openai" -> openAiApiKey != null ? new OpenAiChat(model, openAiApiKey) : new OpenAiChat(model);
             case "anthropic", "claude" ->
                 anthropicApiKey != null ? new AnthropicChat(model, anthropicApiKey) : new AnthropicChat(model);
             case "grok" -> grokApiKey != null ? new GrokChat(model, grokApiKey) : new GrokChat(model);
+            case "groq" -> groqApiKey != null ? new GroqChat(model, groqApiKey) : new GroqChat(model);
             case "nim", "nvidia" -> nimApiKey != null ? new NimChat(model, nimApiKey) : new NimChat(model);
             case "kimi", "moonshot" -> kimiApiKey != null ? new KimiChat(model, kimiApiKey) : new KimiChat(model);
             case "ollama" -> ollamaHost != null ? new OllamaChat(model, ollamaHost) : new OllamaChat(model);
@@ -95,7 +104,10 @@ public class AiClient {
      * prompt) and chatQuick().
      */
     private Chat getProvider(String model) {
-        String lowerModel = model.toLowerCase();
+        if (model == null || model.isBlank()) {
+            throw new IllegalArgumentException("Model name cannot be empty");
+        }
+        String lowerModel = model.toLowerCase(Locale.ROOT);
         if (lowerModel.startsWith("gpt-") || lowerModel.startsWith("o1-") || lowerModel.startsWith("o3-")) {
             return openAiApiKey != null ? new OpenAiChat(model, openAiApiKey) : new OpenAiChat(model);
         } else if (lowerModel.startsWith("gemini-")) {
@@ -104,6 +116,8 @@ public class AiClient {
             return anthropicApiKey != null ? new AnthropicChat(model, anthropicApiKey) : new AnthropicChat(model);
         } else if (lowerModel.startsWith("grok-")) {
             return grokApiKey != null ? new GrokChat(model, grokApiKey) : new GrokChat(model);
+        } else if (lowerModel.startsWith("llama-") || lowerModel.startsWith("groq/")) {
+            return groqApiKey != null ? new GroqChat(model, groqApiKey) : new GroqChat(model);
         } else if (lowerModel.startsWith("moonshotai/") || lowerModel.startsWith("moonshot-")
                 || lowerModel.startsWith("kimi-")) {
             return kimiApiKey != null ? new KimiChat(model, kimiApiKey) : new KimiChat(model);
@@ -136,6 +150,7 @@ public class AiClient {
         private String anthropicApiKey;
         private String ollamaHost;
         private String grokApiKey;
+        private String groqApiKey;
         private String nimApiKey;
         private String kimiApiKey;
 
@@ -166,6 +181,11 @@ public class AiClient {
 
         public Builder grokApiKey(String grokApiKey) {
             this.grokApiKey = grokApiKey;
+            return this;
+        }
+
+        public Builder groqApiKey(String groqApiKey) {
+            this.groqApiKey = groqApiKey;
             return this;
         }
 

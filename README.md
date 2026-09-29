@@ -4,7 +4,7 @@
 
 <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:1e3a8a,100:9333ea&height=200&section=header&text=sidd-ai&fontSize=70&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=One%20Java%20SDK.%20Every%20AI%20model.&descAlignY=55&descSize=18"/>
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&pause=1000&color=9333EA&center=true&vCenter=true&width=700&lines=AiClient.chatQuick(%22gpt-4o%22%2C+prompt);AiClient.chatQuick(%22grok-3%22%2C+prompt);AiClient.chatQuick(%22gemini-2.5-flash%22%2C+prompt);AiClient.chatQuick(%22moonshot-v1-8k%22%2C+prompt);import+io.github.prabhusiddarth.sidd_ai.*;No+Spring.+No+DI.+No+ceremony.;Just+import+and+call." alt="Typing SVG" />
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&pause=1000&color=9333EA&center=true&vCenter=true&width=700&lines=AiClient.chatQuick(%22gpt-4o%22%2C+prompt);AiClient.chatQuick(%22grok-4.3%22%2C+prompt);AiClient.chatQuick(%22gemini-2.5-flash%22%2C+prompt);AiClient.chatQuick(%22kimi-k2.5%22%2C+prompt);import+io.github.prabhusiddarth.sidd_ai.*;No+Spring.+No+DI.+No+ceremony.;Just+import+and+call." alt="Typing SVG" />
 
 <br/>
 
@@ -22,7 +22,7 @@
 
 ## ⚡ What is `sidd-ai`?
 
-A lightweight, **framework-agnostic** Java SDK for calling any major AI model — OpenAI, Google Gemini, Anthropic Claude, or local Ollama — through **one unified API**. No Spring context, no dependency injection, no `application.yml`. Just plain Java, anywhere Java runs.
+A lightweight, **framework-agnostic** Java SDK for calling OpenAI, Google Gemini, Anthropic Claude, xAI Grok, Groq, NVIDIA NIM, Moonshot Kimi, or local Ollama through **one unified API**. No Spring context, no dependency injection, no `application.yml`. Just plain Java, anywhere Java runs.
 
 Think of it as what **LiteLLM** is to Python, but for Java.
 
@@ -56,14 +56,14 @@ That's it. That's the whole setup.
 <dependency>
     <groupId>io.github.prabhusiddarth</groupId>
     <artifactId>sidd-ai</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-implementation 'io.github.prabhusiddarth:sidd-ai:1.0.4'
+implementation 'io.github.prabhusiddarth:sidd-ai:1.0.5'
 ```
 
 ### No build tool? No problem.
@@ -71,7 +71,7 @@ implementation 'io.github.prabhusiddarth:sidd-ai:1.0.4'
 Download the pre-built fat jar (all dependencies bundled) straight from [GitHub Releases](https://github.com/PRABHUSIDDARTH/sidd-ai/releases) — drag it into your project's classpath, no Maven or Gradle needed.
 
 ```bash
-curl -L -o sidd-ai.jar https://github.com/PRABHUSIDDARTH/sidd-ai/releases/latest/download/sidd-ai-1.0.4-all.jar
+curl -L -o sidd-ai.jar https://github.com/PRABHUSIDDARTH/sidd-ai/releases/latest/download/sidd-ai-1.0.5-all.jar
 javac -cp sidd-ai.jar Main.java
 java -cp .:sidd-ai.jar Main
 ```
@@ -105,6 +105,7 @@ AiClient client = AiClient.builder()
         .openAiApiKey("sk-...")
         .geminiApiKey("AIza...")
         .grokApiKey("xai-...")
+        .groqApiKey("gsk_...")
         .nimApiKey("nvapi-...")
         .kimiApiKey("sk-kimi-...")
         .defaultModel("gemini-2.5-flash")
@@ -112,7 +113,7 @@ AiClient client = AiClient.builder()
 
 String answer = client.chat("Explain photosynthesis in one sentence.");
 
-ChatResponse details = client.chatResponse("grok-3", "Hello Grok!");
+ChatResponse details = client.chatResponse("grok-4.3", "Hello Grok!");
 System.out.println("Tokens used: " + details.getTokensUsed());
 ```
 
@@ -121,10 +122,11 @@ System.out.println("Tokens used: " + details.getTokensUsed());
 ```java
 AiClient.chatQuick("gpt-4o", prompt);                       // OpenAI
 AiClient.chatQuick("gemini-2.5-flash", prompt);              // Google Gemini
-AiClient.chatQuick("claude-3-5-sonnet", prompt);             // Anthropic
-AiClient.chatQuick("grok-3", prompt);                        // xAI Grok
-AiClient.chatQuick("deepseek-ai/deepseek-r1", prompt);       // NVIDIA NIM
-AiClient.chatQuick("moonshot-v1-8k", prompt);                // Moonshot Kimi
+AiClient.chatQuick("claude-haiku-4-5-20251001", prompt);     // Anthropic
+AiClient.chatQuick("grok-4.3", prompt);                      // xAI Grok
+AiClient.chatQuick("llama-3.3-70b-versatile", prompt);       // Groq
+AiClient.chatQuick("openai/gpt-oss-20b", prompt);            // NVIDIA NIM
+AiClient.chatQuick("kimi-k2.5", prompt);                     // Moonshot Kimi
 AiClient.chatQuick("llama3.2", prompt);                      // Local Ollama
 ```
 
@@ -141,7 +143,7 @@ String response = client.chatWithProvider("nim", "meta/llama-3.1-8b-instruct", p
 import io.github.prabhusiddarth.sidd_ai.exceptions.*;
 
 try {
-    String answer = AiClient.chatQuick("claude-3-5-sonnet", "Write a haiku about code");
+    String answer = AiClient.chatQuick("claude-haiku-4-5-20251001", "Write a haiku about code");
 } catch (AiAuthException e) {
     System.err.println("Check your ANTHROPIC_API_KEY");
 } catch (AiRateLimitException e) {
@@ -161,10 +163,11 @@ try {
 |---|---|---|
 | 🟢 OpenAI | `gpt-`, `o1-`, `o3-` | `gpt-4o` |
 | 🔵 Google Gemini | `gemini-` | `gemini-2.5-flash` |
-| 🟣 Anthropic Claude | `claude-` | `claude-3-5-sonnet` |
-| ⚡ xAI Grok | `grok-` | `grok-3` |
-| 🔶 NVIDIA NIM | `nvidia/`, `nim-`, `deepseek-ai/`, `meta/`, `mistralai/`, `microsoft/`, `ibm/`, `qwen/`, and more | `nvidia/llama-3.1-nemotron-ultra-253b-v1` |
-| 🌙 Moonshot Kimi | `moonshot-`, `kimi-`, `moonshotai/` | `moonshot-v1-8k` |
+| 🟣 Anthropic Claude | `claude-` | `claude-haiku-4-5-20251001` |
+| ⚡ xAI Grok | `grok-` | `grok-4.3` |
+| 🟠 Groq | `llama-`, `groq/` | `llama-3.3-70b-versatile` |
+| 🔶 NVIDIA NIM | `nvidia/`, `nim-`, `deepseek-ai/`, `meta/`, `mistralai/`, `microsoft/`, `ibm/`, `qwen/`, and more | `openai/gpt-oss-20b` |
+| 🌙 Moonshot Kimi | `moonshot-`, `kimi-`, `moonshotai/` | `kimi-k2.5` |
 | ⚪ Ollama (local) | anything else | `llama3.2` |
 
 </div>

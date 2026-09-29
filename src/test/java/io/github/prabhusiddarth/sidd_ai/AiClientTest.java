@@ -15,11 +15,23 @@ public class AiClientTest {
                 .anthropicApiKey("sk-ant-mockapikey12345")
                 .ollamaHost("http://localhost:11434")
                 .grokApiKey("xai-mockgrokkey1234567890")
+                .groqApiKey("gsk_mockgroqkey1234567890")
                 .nimApiKey("nvapi-mocknimkey1234567890")
                 .kimiApiKey("sk-moon-mockkimikey12345")
                 .build();
 
         assertNotNull(client);
+    }
+
+    @Test
+    public void testRejectsEmptyModelAndProvider() {
+        AiClient client = AiClient.builder().build();
+
+        assertThrows(IllegalArgumentException.class, () -> client.chat("", "hello"));
+        assertThrows(IllegalArgumentException.class,
+                () -> client.chatWithProvider("", "gpt-4o", "hello"));
+        assertThrows(IllegalArgumentException.class,
+                () -> client.chatWithProvider(null, "gpt-4o", "hello"));
     }
 
     @Test

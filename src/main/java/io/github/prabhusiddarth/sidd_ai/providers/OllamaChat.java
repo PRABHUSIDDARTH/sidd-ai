@@ -50,6 +50,7 @@ public class OllamaChat implements Chat {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(endpoint))
+                .timeout(Duration.ofSeconds(60))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
@@ -57,8 +58,10 @@ public class OllamaChat implements Chat {
         try {
             HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             return handleResponse(response);
-        } catch (java.io.IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new AiApiException("Failed to call Ollama: " + e.getMessage(), e);
+        } catch (java.io.IOException e) {
             throw new AiApiException("Failed to call Ollama: " + e.getMessage(), e);
         }
     }

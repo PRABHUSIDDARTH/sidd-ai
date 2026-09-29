@@ -44,6 +44,7 @@ public class NimChat implements Chat {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(ENDPOINT))
+                .timeout(Duration.ofSeconds(60))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + apiKey)
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
@@ -52,8 +53,10 @@ public class NimChat implements Chat {
         try {
             HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             return handleResponse(response);
-        } catch (java.io.IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new AiApiException("Failed to call NIM: " + e.getMessage(), e);
+        } catch (java.io.IOException e) {
             throw new AiApiException("Failed to call NIM: " + e.getMessage(), e);
         }
     }
