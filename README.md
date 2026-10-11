@@ -1,56 +1,78 @@
 <div align="center">
 
-<img src="assets/logo.png" width="180" alt="sidd-ai logo"/>
+<img src="assets/logo.png" width="160" alt="sidd-ai logo"/>
 
-<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:1e3a8a,100:9333ea&height=200&section=header&text=sidd-ai&fontSize=70&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=One%20Java%20SDK.%20Every%20AI%20model.&descAlignY=55&descSize=18"/>
+# sidd-ai
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&pause=1000&color=9333EA&center=true&vCenter=true&width=700&lines=AiClient.chatQuick(%22gpt-4o%22%2C+prompt);AiClient.chatQuick(%22grok-4.3%22%2C+prompt);AiClient.chatQuick(%22gemini-2.5-flash%22%2C+prompt);AiClient.chatQuick(%22kimi-k2.5%22%2C+prompt);import+io.github.prabhusiddarth.sidd_ai.*;No+Spring.+No+DI.+No+ceremony.;Just+import+and+call." alt="Typing SVG" />
+**One lightweight Java SDK for every major LLM provider.**
 
-<br/>
+Call OpenAI, Google Gemini, Anthropic Claude, xAI Grok, Groq, NVIDIA NIM, Moonshot Kimi, and local Ollama models through a single, framework-agnostic API.
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.prabhusiddarth/sidd-ai?style=for-the-badge&logo=apachemaven&color=C71A36&label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.prabhusiddarth/sidd-ai)
-[![GitHub release](https://img.shields.io/github/v/release/PRABHUSIDDARTH/sidd-ai?style=for-the-badge&logo=github&color=181717&label=GitHub%20Release)](https://github.com/PRABHUSIDDARTH/sidd-ai/releases)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue?style=for-the-badge)](LICENSE)
-[![Java](https://img.shields.io/badge/Java-17%2B-orange?style=for-the-badge&logo=openjdk)](https://openjdk.org/)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.prabhusiddarth/sidd-ai?style=flat-square&logo=apachemaven&color=C71A36&label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.prabhusiddarth/sidd-ai)
+[![GitHub release](https://img.shields.io/github/v/release/PRABHUSIDDARTH/sidd-ai?style=flat-square&logo=github&label=Release)](https://github.com/PRABHUSIDDARTH/sidd-ai/releases)
+[![Java](https://img.shields.io/badge/Java-17%2B-orange?style=flat-square&logo=openjdk)](https://openjdk.org/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue?style=flat-square)](LICENSE)
 
-[![Stars](https://img.shields.io/github/stars/PRABHUSIDDARTH/sidd-ai?style=social)](https://github.com/PRABHUSIDDARTH/sidd-ai/stargazers)
-[![Forks](https://img.shields.io/github/forks/PRABHUSIDDARTH/sidd-ai?style=social)](https://github.com/PRABHUSIDDARTH/sidd-ai/network/members)
+[Installation](#installation) •
+[Quick Start](#quick-start) •
+[Providers](#supported-providers) •
+[Configuration](#configuration) •
+[API Reference](API_REFERENCE.md) •
+[Contributing](#contributing)
 
 </div>
 
 ---
 
-## ⚡ What is `sidd-ai`?
+## Overview
 
-A lightweight, **framework-agnostic** Java SDK for calling OpenAI, Google Gemini, Anthropic Claude, xAI Grok, Groq, NVIDIA NIM, Moonshot Kimi, or local Ollama through **one unified API**. No Spring context, no dependency injection, no `application.yml`. Just plain Java, anywhere Java runs.
-
-Think of it as what **LiteLLM** is to Python, but for Java.
-
+`sidd-ai` is a minimal Java library that gives you a single, consistent interface to multiple AI providers. It requires no Spring context, no dependency injection, and no YAML configuration. It works in a plain `main()` method, a CLI tool, a desktop app, or any server framework.
 
 ```java
-String response = AiClient.chatQuick("gpt-4o", "Explain recursion in one sentence");
-System.out.println(response);
+String answer = AiClient.chatQuick("gpt-4o", "Explain recursion in one sentence.");
 ```
 
-That's it. That's the whole setup.
+If you know LiteLLM from Python, `sidd-ai` aims to fill the same role for Java.
+
+### Key Features
+
+- **Unified API**: one `AiClient` for eight providers, so switching models means changing a string.
+- **Automatic model routing**: `ModelRouter` picks the provider from the model name prefix.
+- **Explicit provider selection**: `chatWithProvider(...)` bypasses prefix routing when you need it.
+- **Zero-config credentials**: API keys load from environment variables or a local `.env` file.
+- **Typed exceptions**: one hierarchy for auth failures, rate limits, and general API errors.
+- **Response metadata**: `ChatResponse` exposes the content, the model, and token usage.
+- **Minimal footprint**: built on the JDK `java.net.http.HttpClient`, with Jackson as the only runtime dependency.
+- **Flexible distribution**: available on Maven Central, GitHub Packages, or as a self-contained fat jar.
+
+### How It Compares
+
+| Capability                    | Spring AI | LangChain4j | **sidd-ai** |
+| ----------------------------- | :-------: | :---------: | :---------: |
+| No framework required         |    No     |   Partial   |   **Yes**   |
+| Works in a plain `main()`     |    No     |   Partial   |   **Yes**   |
+| One-line static calls         |    No     |     No      |   **Yes**   |
+| Unified exception hierarchy   |  Partial  |   Partial   |   **Yes**   |
+| Model swap via string         |    Yes    |     Yes     |   **Yes**   |
 
 ---
 
-## 🎯 Why sidd-ai?
+## What's New in 1.0.5
 
-| | Spring AI | LangChain4j | **sidd-ai** |
-|---|:---:|:---:|:---:|
-| Zero framework required | ❌ | ⚠️ | ✅ |
-| Works in plain `main()` | ❌ | ⚠️ | ✅ |
-| One-line quick calls | ❌ | ❌ | ✅ |
-| Unified exception hierarchy | ⚠️ | ⚠️ | ✅ |
-| Model swap via string | ✅ | ✅ | ✅ |
+- **Groq support**: new `GroqChat` provider (`GROQ_API_KEY`), routed for `llama-*` and `groq/*` models, with `groqApiKey(...)` on the builder and `"groq"` as an explicit provider key.
+- **Expanded NVIDIA NIM routing**: adds the `openai/`, `meta/`, `mistralai/`, `microsoft/`, `ibm/`, `qwen/`, `deepseek-ai/`, `z-ai/`, `zhipuai/`, and `minimaxai/` namespaces.
+- **Provider aliases**: `"claude"`, `"nvidia"`, and `"moonshot"` are accepted alongside `"anthropic"`, `"nim"`, and `"kimi"`.
+- **Opt-in live smoke tests**: real calls against every configured provider, enabled with `-Dsidd.ai.liveTests=true`.
+
+See the [releases page](https://github.com/PRABHUSIDDARTH/sidd-ai/releases) for the full changelog.
 
 ---
 
-## 📦 Installation
+## Installation
 
-### Maven Central (recommended)
+**Requirements:** Java 17 or later.
+
+### Maven
 
 ```xml
 <dependency>
@@ -66,23 +88,29 @@ That's it. That's the whole setup.
 implementation 'io.github.prabhusiddarth:sidd-ai:1.0.5'
 ```
 
-### No build tool? No problem.
+```kotlin
+implementation("io.github.prabhusiddarth:sidd-ai:1.0.5")
+```
 
-Download the pre-built fat jar (all dependencies bundled) straight from [GitHub Releases](https://github.com/PRABHUSIDDARTH/sidd-ai/releases) — drag it into your project's classpath, no Maven or Gradle needed.
+### Standalone jar (no build tool)
+
+A fat jar with all dependencies bundled is published under the `all` classifier.
 
 ```bash
-curl -L -o sidd-ai.jar https://github.com/PRABHUSIDDARTH/sidd-ai/releases/latest/download/sidd-ai-1.0.5-all.jar
+curl -L -o sidd-ai.jar \
+  https://repo1.maven.org/maven2/io/github/prabhusiddarth/sidd-ai/1.0.5/sidd-ai-1.0.5-all.jar
+
 javac -cp sidd-ai.jar Main.java
-java -cp .:sidd-ai.jar Main
+java  -cp .:sidd-ai.jar Main      # use ; instead of : on Windows
 ```
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
-### 1. Zero-config static call
+### 1. Static one-line call
 
-Reads API keys automatically from environment variables or a local `.env` file.
+Credentials are resolved automatically from environment variables or `.env`.
 
 ```java
 import io.github.prabhusiddarth.sidd_ai.AiClient;
@@ -95,7 +123,9 @@ public class QuickStart {
 }
 ```
 
-### 2. Client builder for real applications
+### 2. Configured client
+
+Use the builder when you want to inject keys programmatically or set a default model. Any key you leave out falls back to its environment variable.
 
 ```java
 import io.github.prabhusiddarth.sidd_ai.AiClient;
@@ -104,40 +134,50 @@ import io.github.prabhusiddarth.sidd_ai.ChatResponse;
 AiClient client = AiClient.builder()
         .openAiApiKey("sk-...")
         .geminiApiKey("AIza...")
+        .anthropicApiKey("sk-ant-...")
         .grokApiKey("xai-...")
         .groqApiKey("gsk_...")
         .nimApiKey("nvapi-...")
-        .kimiApiKey("sk-kimi-...")
+        .kimiApiKey("sk-...")
+        .ollamaHost("http://localhost:11434")
         .defaultModel("gemini-2.5-flash")
         .build();
 
+// Uses the default model
 String answer = client.chat("Explain photosynthesis in one sentence.");
 
-ChatResponse details = client.chatResponse("grok-4.3", "Hello Grok!");
-System.out.println("Tokens used: " + details.getTokensUsed());
+// Specific model, full response metadata
+ChatResponse res = client.chatResponse("grok-4.3", "Hello, Grok!");
+System.out.println(res.getContent());
+System.out.println("Model:  " + res.getModel());
+System.out.println("Tokens: " + res.getTokensUsed());
 ```
 
-### 3. Swap providers by changing one string
+### 3. Switch providers by changing the model
 
 ```java
-AiClient.chatQuick("gpt-4o", prompt);                       // OpenAI
-AiClient.chatQuick("gemini-2.5-flash", prompt);              // Google Gemini
-AiClient.chatQuick("claude-haiku-4-5-20251001", prompt);     // Anthropic
-AiClient.chatQuick("grok-4.3", prompt);                      // xAI Grok
-AiClient.chatQuick("llama-3.3-70b-versatile", prompt);       // Groq
-AiClient.chatQuick("openai/gpt-oss-20b", prompt);            // NVIDIA NIM
-AiClient.chatQuick("kimi-k2.5", prompt);                     // Moonshot Kimi
-AiClient.chatQuick("llama3.2", prompt);                      // Local Ollama
+AiClient.chatQuick("gpt-4o", prompt);                     // OpenAI
+AiClient.chatQuick("gemini-2.5-flash", prompt);           // Google Gemini
+AiClient.chatQuick("claude-haiku-4-5-20251001", prompt);  // Anthropic Claude
+AiClient.chatQuick("grok-4.3", prompt);                   // xAI Grok
+AiClient.chatQuick("llama-3.3-70b-versatile", prompt);    // Groq
+AiClient.chatQuick("openai/gpt-oss-20b", prompt);         // NVIDIA NIM
+AiClient.chatQuick("kimi-k2.5", prompt);                  // Moonshot Kimi
+AiClient.chatQuick("llama3.2", prompt);                   // Local Ollama
 ```
 
-### 4. Explicit provider selection (bypass prefix routing)
+### 4. Explicit provider selection
+
+If a model name has no recognizable prefix, or the same model is hosted by more than one provider, name the provider directly:
 
 ```java
-// Useful when the model name has no recognizable prefix
-String response = client.chatWithProvider("nim", "meta/llama-3.1-8b-instruct", prompt);
+String text = client.chatWithProvider("nim", "meta/llama-3.1-8b-instruct", prompt);
+ChatResponse res = client.chatResponseWithProvider("groq", "openai/gpt-oss-20b", prompt);
 ```
 
-### 5. Resilient error handling
+Accepted provider keys: `openai`, `gemini`, `anthropic` / `claude`, `grok`, `groq`, `nim` / `nvidia`, `kimi` / `moonshot`, `ollama`.
+
+### 5. Error handling
 
 ```java
 import io.github.prabhusiddarth.sidd_ai.exceptions.*;
@@ -145,44 +185,94 @@ import io.github.prabhusiddarth.sidd_ai.exceptions.*;
 try {
     String answer = AiClient.chatQuick("claude-haiku-4-5-20251001", "Write a haiku about code");
 } catch (AiAuthException e) {
-    System.err.println("Check your ANTHROPIC_API_KEY");
+    // Missing or invalid API key (HTTP 401)
 } catch (AiRateLimitException e) {
-    System.err.println("Rate limited — back off and retry");
+    // Provider rate limit hit (HTTP 429): back off and retry
 } catch (AiApiException e) {
-    System.err.println("API error: " + e.getMessage());
+    // Any other provider or transport error
 }
 ```
 
----
-
-## 🧩 Supported Providers
-
-<div align="center">
-
-| Provider | Model prefix(es) | Example |
-|---|---|---|
-| 🟢 OpenAI | `gpt-`, `o1-`, `o3-` | `gpt-4o` |
-| 🔵 Google Gemini | `gemini-` | `gemini-2.5-flash` |
-| 🟣 Anthropic Claude | `claude-` | `claude-haiku-4-5-20251001` |
-| ⚡ xAI Grok | `grok-` | `grok-4.3` |
-| 🟠 Groq | `llama-`, `groq/` | `llama-3.3-70b-versatile` |
-| 🔶 NVIDIA NIM | `nvidia/`, `nim-`, `deepseek-ai/`, `meta/`, `mistralai/`, `microsoft/`, `ibm/`, `qwen/`, and more | `openai/gpt-oss-20b` |
-| 🌙 Moonshot Kimi | `moonshot-`, `kimi-`, `moonshotai/` | `kimi-k2.5` |
-| ⚪ Ollama (local) | anything else | `llama3.2` |
-
-</div>
-
-Routing is **automatic** — `ModelRouter` reads the model string prefix and instantiates the right provider under the hood. No manual imports of provider-specific classes needed. You can also bypass prefix routing entirely using `client.chatWithProvider("nim", model, prompt)` to explicitly select a provider.
+All exceptions extend `AiException`, so you can also catch that single base type.
 
 ---
 
-## 📖 Full API Reference
+## Supported Providers
 
-See [`API_REFERENCE.md`](API_REFERENCE.md) for every class, method, and exception in the library.
+| Provider         | Routed model prefixes                                                                                                          | Example                     | Credential          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------- |
+| OpenAI           | `gpt-`, `o1-`, `o3-`                                                                                                           | `gpt-4o`                    | `OPENAI_API_KEY`    |
+| Google Gemini    | `gemini-`                                                                                                                      | `gemini-2.5-flash`          | `GEMINI_API_KEY`    |
+| Anthropic Claude | `claude-`                                                                                                                      | `claude-haiku-4-5-20251001` | `ANTHROPIC_API_KEY` |
+| xAI Grok         | `grok-`                                                                                                                        | `grok-4.3`                  | `GROK_API_KEY`      |
+| Groq             | `llama-`, `groq/`                                                                                                              | `llama-3.3-70b-versatile`   | `GROQ_API_KEY`      |
+| Moonshot Kimi    | `kimi-`, `moonshot-`, `moonshotai/`                                                                                            | `kimi-k2.5`                 | `KIMI_API_KEY`      |
+| NVIDIA NIM       | `nvidia/`, `nim-`, `openai/`, `meta/`, `mistralai/`, `microsoft/`, `ibm/`, `qwen/`, `deepseek-ai/`, `z-ai/`, `zhipuai/`, `minimaxai/` | `openai/gpt-oss-20b`        | `NIM_API_KEY`       |
+| Ollama (local)   | Any model that matches none of the above                                                                                       | `llama3.2`                  | `OLLAMA_HOST`       |
+
+Prefix matching is case-insensitive and evaluated top to bottom. Note that `moonshotai/` models route to Kimi rather than NIM; use `chatWithProvider("nim", ...)` to force NIM.
 
 ---
 
-## 🛠️ Building from source
+## Configuration
+
+Each provider reads its credential in this order:
+
+1. The value passed to the `AiClient.builder()`
+2. A system environment variable
+3. A `.env` file in the working directory
+
+Copy the template and fill in only the providers you use:
+
+```bash
+cp .env.example .env
+```
+
+```dotenv
+OPENAI_API_KEY=...
+GEMINI_API_KEY=...
+ANTHROPIC_API_KEY=...
+GROK_API_KEY=...
+GROQ_API_KEY=...
+NIM_API_KEY=...
+KIMI_API_KEY=...
+OLLAMA_HOST=http://localhost:11434
+```
+
+> **Security:** never commit your `.env` file. It is already listed in `.gitignore`. See [SECURITY.md](SECURITY.md) for how to report vulnerabilities.
+
+---
+
+## Architecture
+
+```
+AiClient ──► ModelRouter ──► Chat (interface)
+                               ├── OpenAiChat
+                               ├── GeminiChat
+                               ├── AnthropicChat
+                               ├── GrokChat
+                               ├── GroqChat
+                               ├── NimChat
+                               ├── KimiChat
+                               └── OllamaChat
+```
+
+Every provider implements the same `Chat` interface and returns a `ChatResponse`. HTTP failures are translated into the shared exception hierarchy. See [ARCHITECTURE.md](ARCHITECTURE.md) for the design and [LEARNING_GUIDE.md](LEARNING_GUIDE.md) for a guided walkthrough of the codebase.
+
+---
+
+## Documentation
+
+| Document                                   | Description                                    |
+| ------------------------------------------ | ---------------------------------------------- |
+| [API_REFERENCE.md](API_REFERENCE.md)       | Every public class, method, and exception      |
+| [ARCHITECTURE.md](ARCHITECTURE.md)         | Internal design and provider abstraction       |
+| [LEARNING_GUIDE.md](LEARNING_GUIDE.md)     | Step-by-step guide to how the SDK is built     |
+| [CONTRIBUTING.md](CONTRIBUTING.md)         | Contribution workflow and guidelines           |
+
+---
+
+## Building and Testing
 
 ```bash
 git clone https://github.com/PRABHUSIDDARTH/sidd-ai.git
@@ -190,33 +280,39 @@ cd sidd-ai
 mvn clean install
 ```
 
-Runs the full test suite (across all providers and the router) and installs to your local `.m2` repository.
+This runs the unit tests for every provider and the router, then installs the library and the `-all` fat jar into your local `~/.m2` repository.
+
+To run the **live smoke tests**, which make real API calls against each provider that has a key configured:
+
+```bash
+mvn test -Dtest=ProviderLiveSmokeTest -Dsidd.ai.liveTests=true
+```
+
+Providers without a configured key are skipped automatically.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome — especially new provider implementations. Each provider is a single class implementing the `Chat` interface, so adding one is straightforward:
+Contributions are welcome, especially new provider integrations. A provider is a single class, so adding one takes four steps:
 
-1. Implement `Chat` for your provider (see `OpenAiChat` as reference)
-2. Register the prefix in `ModelRouter`
-3. Add tests
-4. Open a PR
+1. Implement the `Chat` interface (use `OpenAiChat` as a reference).
+2. Register its model prefixes in `ModelRouter` and `AiClient`.
+3. Add a builder key and an explicit provider key in `AiClient`.
+4. Add unit tests and open a pull request.
 
----
-
-## 📄 License
-
-Apache License 2.0 — see [LICENSE](LICENSE) for details.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md) before submitting.
 
 ---
+
+## License
+
+Distributed under the [Apache License 2.0](LICENSE).
 
 <div align="center">
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=16&pause=1500&color=6B7280&center=true&vCenter=true&width=500&lines=Built+by+Prabhu+Siddarth;%E2%98%95+Java+%E2%80%A2+%F0%9F%A4%96+AI+%E2%80%A2+%E2%9A%A1+No+Framework" alt="Footer Typing SVG" />
+---
 
-[![GitHub](https://img.shields.io/badge/GitHub-PRABHUSIDDARTH-181717?style=for-the-badge&logo=github)](https://github.com/PRABHUSIDDARTH)
-
-<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:9333ea,100:1e3a8a&height=100&section=footer"/>
+Built by [Prabhu Siddarth](https://github.com/PRABHUSIDDARTH). If `sidd-ai` is useful to you, consider giving it a ⭐ on GitHub.
 
 </div>
